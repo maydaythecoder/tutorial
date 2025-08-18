@@ -41,13 +41,13 @@ NODE_ENV=development
 
 ```bash
 # Start PostgreSQL database
-docker-compose up -d
+docker compose up -d dev-db
 
 # Verify database is running
-docker-compose ps
+docker compose ps
 
 # Check database logs
-docker-compose logs dev-db
+docker compose logs dev-db
 ```
 
 ### 4. Database Setup
@@ -59,8 +59,8 @@ npm install
 # Generate Prisma client
 npx prisma generate
 
-# Push schema to database
-npx prisma db push
+# Apply migrations to database
+npx prisma migrate dev
 
 # (Optional) Seed database with sample data
 npx prisma db seed
@@ -102,7 +102,7 @@ Your API will be available at `http://localhost:3000`
 npx prisma studio
 
 # Reset database (⚠️ Destructive)
-npx prisma db push --force-reset
+npx prisma migrate reset
 
 # Generate migrations
 npx prisma migrate dev --name <migration-name>
@@ -115,7 +115,7 @@ npx prisma migrate deploy
 
 ```bash
 # Connect directly to PostgreSQL
-docker exec -it tutorial-dev-db-1 psql -U postgres -d nest
+docker compose exec dev-db psql -U postgres -d nest
 
 # View tables
 \dt
@@ -136,7 +136,7 @@ docker exec -it tutorial-dev-db-1 psql -U postgres -d nest
 ```bash
 # Modify prisma/schema.prisma
 # Then update database:
-npx prisma db push
+npx prisma migrate dev --name <describe-change>
 npx prisma generate
 ```
 
@@ -159,13 +159,13 @@ npm run test:cov
 
 ```bash
 # Check if database is running
-docker-compose ps
+docker compose ps
 
 # Restart database
-docker-compose restart dev-db
+docker compose restart dev-db
 
 # View database logs
-docker-compose logs dev-db
+docker compose logs dev-db
 ```
 
 ### Port Conflicts
@@ -189,7 +189,7 @@ kill -9 <PID>
 npx prisma generate --force
 
 # Reset database
-npx prisma db push --force-reset
+npx prisma migrate reset
 ```
 
 ## 🛡️ Security Considerations
@@ -207,6 +207,21 @@ npx prisma db push --force-reset
 - Enable HTTPS/TLS
 - Use strong database passwords
 - Implement rate limiting
+
+## ❗ Common Error: Missing Tables
+
+If you encounter:
+
+```text
+The table `public.User` does not exist in the current database.
+```
+
+Fix:
+
+1. Ensure `.env` uses port 51213: `postgresql://postgres:123@localhost:51213/nest`
+2. Start DB: `docker compose up -d dev-db`
+3. Apply migrations: `npx prisma migrate dev`
+4. Inspect DB with Prisma Studio: `npx prisma studio`
 
 ## 📄 License
 
