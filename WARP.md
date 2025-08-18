@@ -39,15 +39,21 @@ The Prisma schema defines two main entities:
 # Install dependencies
 npm install
 
-# Setup environment (create .env file first)
-cp .env.example .env  # Edit with your configuration
+# Create .env in project root (example values)
+cat > .env << 'EOF'
+DATABASE_URL="postgresql://postgres:123@localhost:51213/nest"
+JWT_SECRET="dev-only-change-me"
+JWT_EXPIRES_IN="15m"
+PORT=3000
+NODE_ENV=development
+EOF
 
 # Start database
-docker-compose up -d
+docker compose up -d dev-db
 
-# Setup database schema
+# Setup database schema (apply existing migrations)
 npx prisma generate
-npx prisma db push
+npx prisma migrate dev
 ```
 
 ### Development Workflow
@@ -118,19 +124,19 @@ npm run format
 
 ```bash
 # Start PostgreSQL database
-docker-compose up -d
+docker compose up -d
 
 # Check service status
-docker-compose ps
+docker compose ps
 
 # View database logs
-docker-compose logs dev-db
+docker compose logs dev-db
 
 # Connect to PostgreSQL directly
-docker exec -it tutorial-dev-db-1 psql -U postgres -d nest
+docker compose exec dev-db psql -U postgres -d nest
 
 # Restart database service
-docker-compose restart dev-db
+docker compose restart dev-db
 ```
 
 ## Environment Configuration
@@ -190,14 +196,29 @@ lsof -i :51213
 # Clear Prisma cache
 npx prisma generate --force
 # Reset database if needed
-npx prisma db push --force-reset
+npx prisma migrate reset
 ```
 
 ### Database Connection Problems
 
 ```bash
 # Verify database is running
-docker-compose ps
+docker compose ps
 # Check logs
-docker-compose logs dev-db
+docker compose logs dev-db
 ```
+
+### "The table public.User does not exist"
+
+If you see this error from Prisma:
+
+```text
+The table `public.User` does not exist in the current database.
+```
+
+Do the following:
+
+1. Confirm your `.env` uses port 51213: `postgresql://postgres:123@localhost:51213/nest`
+2. Ensure DB is running: `docker compose up -d dev-db`
+3. Apply migrations: `npx prisma migrate dev`
+4. If still failing, open Studio to inspect tables: `npx prisma studio`
