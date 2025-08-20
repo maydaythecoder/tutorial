@@ -12,10 +12,16 @@ describe('AppController (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
   });
+  afterAll(async () => {
+    await app.close();
+  });
   it('should be defined', () => {
     expect(app).toBeDefined();
   });
-  afterAll(async () => {
-    await app.close();
+  it('should be defined', () => {
+    expect(app).toBeDefined();
+  });
+  it('should be defined', () => {
+    expect(app).toBeDefined();
   });
 });
