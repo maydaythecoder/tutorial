@@ -1,14 +1,21 @@
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 
 describe('AppController (e2e)', () => {
+  let app: INestApplication;
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
-    const app = moduleRef.createNestApplication();
+    app = moduleRef.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
-    await app.listen(3000);
   });
-  it.todo('should be defined');
+  it('should be defined', () => {
+    expect(app).toBeDefined();
+  });
+  afterAll(async () => {
+    await app.close();
+  });
 });
